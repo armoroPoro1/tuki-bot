@@ -1,0 +1,7 @@
+ccxt
+pandas==2.3.3
+pandas-ta==0.4.71b0
+numpy==2.2.6
+gspread
+google-auth
+python-dotenv
