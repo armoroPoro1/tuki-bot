@@ -36,8 +36,9 @@ class PositionManager:
     def ensure_leverage(self) -> None:
         # Best-effort; some exchanges/accounts may not allow leverage changes via API.
         try:
-            from src.exchange.binance_futures import set_futures_leverage
+            from src.exchange.binance_futures import set_futures_leverage, set_futures_margin_mode
 
+            set_futures_margin_mode(self.exchange, self.symbol, "ISOLATED")
             set_futures_leverage(self.exchange, self.symbol, self.leverage)
         except Exception:
             # Continue; leverage may already be set or may require manual configuration.

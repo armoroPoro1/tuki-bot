@@ -74,6 +74,38 @@ def set_futures_leverage(
     )
 
 
+def set_futures_margin_mode(
+    exchange: ccxt.Exchange,
+    symbol: str,
+    margin_type: str = "ISOLATED",
+) -> None:
+    """
+    Set margin type ('ISOLATED' or 'CROSSED') for a given futures symbol.
+    """
+    if hasattr(exchange, "set_margin_mode"):
+        try:
+            # ccxt standardizes margin modes to lowercase
+            exchange.set_margin_mode(margin_type.lower(), symbol, {"marginType": margin_type.upper()})
+            return
+        except Exception as e:
+            if "No need to change margin type" in str(e) or "MarginModeAlreadySet" in type(e).__name__:
+                return
+            # Fallback
+            pass
+
+    if not hasattr(exchange, "fapiPrivate_post_margintype"):
+        raise RuntimeError("This ccxt Binance version does not support setting margin type.")
+
+    try:
+        exchange.fapiPrivate_post_margintype(
+            {"symbol": symbol.replace("/", ""), "marginType": margin_type.upper()}
+        )
+    except Exception as e:
+        if "No need to change" in str(e):
+            return
+        raise e
+
+
 def load_market_and_precision(exchange: ccxt.Exchange, symbol: str) -> dict:
     """
     Ensure market metadata is loaded and return it.
